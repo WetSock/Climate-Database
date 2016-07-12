@@ -24,6 +24,7 @@ class TableReader
     int index=0;
     QString minus = QRegularExpression::escape("-");
 public:
+    TableData GetDataFromTable(TableData);
     bool SetData(QList<QString>);
     QList<QString> GetTableNames();
     int ContentsSearch();
@@ -32,6 +33,7 @@ public:
     QString GetCurrentString();
     TableData GetTableByName(QString);
     QList<TableData> GetAllTables();
+    bool ShowDividedTable(QList<QList<QString>>);
     QList<int> GetRanges(QString);
     bool ShowTables(QList<TableData>);
     TableReader();
