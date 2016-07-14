@@ -39,7 +39,7 @@ TableData TableReader::GetDataFromTable(TableData table)
                 // Для начала убираем из строки слова про посторонние провода и переходы
                 {
                     QRegularExpression postProvod("(.+)(Пост.провод)(.+)");
-                    QRegularExpression perehod("(.+)(Переход.+месяца?)(.+)");
+                    QRegularExpression perehod("(.+)(Переход.+месяца?)(.*)");
                     QRegularExpressionMatch postProvodMatch=postProvod.match(text);
                     QRegularExpressionMatch perehodMatch=perehod.match(text);
                     if (postProvodMatch.hasMatch())
@@ -125,7 +125,7 @@ TableData TableReader::GetDataFromTable(TableData table)
                     // Для начала убираем из строки слова про посторонние провода и переходы
                     {
                         QRegularExpression postProvod("(.+)(Пост.провод)(.+)");
-                        QRegularExpression perehod("(.+)(Переход.+месяца?)(.+)");
+                        QRegularExpression perehod("(.+)(Переход.+месяца?)(.*)");
                         QRegularExpressionMatch postProvodMatch=postProvod.match(text);
                         QRegularExpressionMatch perehodMatch=perehod.match(text);
                         if (postProvodMatch.hasMatch())
@@ -505,6 +505,22 @@ bool TableReader::ShowTables(QList<TableData> allTables)
     }
 
     return true;
+}
+
+QList<TableData> TableReader::AddYearAndEdition()
+{
+    QList<TableData> allTables=GetAllTables();
+
+    for (int i=0,length=allTables.length(); i<length; i++)
+    {
+        for (int j=0,length1=allTables[i].dividedData.length(); j<length1; j++)
+        {
+            allTables[i].dividedData[j].prepend(QString::number(allTables[i].month));
+            allTables[i].dividedData[j].prepend(QString::number(allTables[i].year));
+            allTables[i].dividedData[j].prepend(QString::number(allTables[i].edition));
+        }
+    }
+    return allTables;
 }
 
 QList<int> TableReader::GetRanges(QString text)

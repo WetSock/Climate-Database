@@ -36,6 +36,7 @@ public:
     QList<TableData> GetAllTables(); // Получение списка всех таблиц
     bool ShowDividedTable(QList<QList<QString>>); // Вывод отформатированных данных из таблицы в консоль
     bool ShowTables(QList<TableData>); // Вывод исходных строк (с необработанными данными) всех таблиц
+    QList<TableData> AddYearAndEdition();
     TableReader();
 };
 
