@@ -439,6 +439,7 @@ QString TableReader::GetCurrentString()
 
 TableData TableReader::GetTableByName(QString input)
 {
+    index = 0;
     QRegularExpression TableSearch(" Таблица[ 0-9.]+.*" + QRegularExpression::escape(input));
     QRegularExpressionMatch match;
     int j=0;
