@@ -23,18 +23,18 @@ class TableReader
     QList<QString> datafile;
     int index=0;
     QString minus = QRegularExpression::escape("-");
-public:
     TableData GetDataFromTable(TableData);
-    bool SetData(QList<QString>);
-    QList<QString> GetTableNames();
     int ContentsSearch();
     int GetCurrentIndex();
-    TableData GetNextTable();
     QString GetCurrentString();
+    QList<int> GetRanges(QString);
+    QList<QString> GetTableNames();
+public:
+    bool SetData(QList<QString>);
+    TableData GetNextTable();
     TableData GetTableByName(QString);
     QList<TableData> GetAllTables();
     bool ShowDividedTable(QList<QList<QString>>);
-    QList<int> GetRanges(QString);
     bool ShowTables(QList<TableData>);
     TableReader();
 };

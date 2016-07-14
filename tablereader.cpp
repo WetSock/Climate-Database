@@ -101,7 +101,6 @@ TableData TableReader::GetDataFromTable(TableData table)
                         if (stationName.match(text).hasMatch())
                         {
                             varFor9Table=stationName.match(text).captured();
-                            qDebug() << stationName.match(text).captured();
                         }
                         else table.wrongStrings << text;
                     }
@@ -203,6 +202,7 @@ TableData TableReader::GetDataFromTable(TableData table)
     else
     {
         qDebug() << "Invalid ranges value. Class dataFromTables";
+        return table;
     }
 }
 
@@ -428,6 +428,7 @@ TableData TableReader::GetNextTable()
     else
     {
         qDebug() << "Can't find table. Class TableReader";
+        return nextTable;
     }
 }
 
