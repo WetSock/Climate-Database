@@ -18,7 +18,7 @@ void IOLog::start()
     configuration.setFileName(QCoreApplication::applicationDirPath() + "/configs.configurate"); //статический путь до файла конфигурации
     QStringList conf_strings = readFile(configuration);
     if(conf_strings.length() >= 2){ //spec, log, convertToTxt, convertToCSV
-        _specification.setFileName(conf_strings.at(0));
+        _specification.setFileName(QCoreApplication::applicationDirPath() + conf_strings.at(0));
         readSpecificate();
 //        foreach(TableSpecificate table, tablesSpecificate){
 //            qDebug() << table.originName << table.transliterationName;
@@ -27,7 +27,7 @@ void IOLog::start()
 //            }
 //            qDebug() << endl;
 //        }
-        _log.setFileName(conf_strings.at(1));
+        _log.setFileName(QCoreApplication::applicationDirPath() + conf_strings.at(1));
         if(!_log.open(QIODevice::Append | QIODevice::Text)){
             errorProgram(Error("IOLog","start","лог файл не может быть открыт"), MSG_CONNECTED_QDEBUG);
         }
@@ -65,6 +65,11 @@ void IOLog::writeLog(Error error)
     //_log.seek(0);
     static QTextStream out(&_log);
     out << endl << "Error:   " << error.errorClass << "::" << error.errorMethod << endl << error.text << endl;
+}
+
+Error IOLog::lastError() const
+{
+    return *_error;
 }
 
 QStringList IOLog::readFile(QFile & file)
@@ -189,6 +194,9 @@ void IOLog::readSpecificate()
 
 void IOLog::errorProgram(Error error, Message message)
 {
+    delete _error;
+    _error = new Error(error.errorClass, error.errorMethod, error.text);
+
     if(message & 0b001){
         //вывод в qdebug
         qDebug() << error.errorClass + "::" + error.errorMethod + "-> " + error.text;

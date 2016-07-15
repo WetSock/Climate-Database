@@ -8,6 +8,7 @@
 #include "iolog.h"
 
 
+
 struct DataConnection{
     QUrl path;
     QString user =      "admin";
@@ -45,12 +46,17 @@ public:
     bool writeData(QString nameTable, QList<QList<QString>> values);
     //bool updateData(QString nameTable);
 
+    QStringList namesTables();
+    QString transliteration(QString); //целесообразность данного метода необходимо пересмотреть
+
 private:
     bool isExistTable(QString nameTable); //проверка по любому из имен на существование таблицы в БД //+
     bool createTable(QString nameTable); //+
 
-    QString transliteration(QString); //целесообразность данного метода необходимо пересмотреть
+
     QString quotes(QString data, QString type);
+
+
 
 
 

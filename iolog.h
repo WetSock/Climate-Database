@@ -55,6 +55,7 @@ class IOLog : public QObject
     QFile _specification;
 
     QVector<TableSpecificate> tablesSpecificate;
+    Error * _error; //не факт что ошибка будет именно та что нужна
 
     void readSpecificate();                                                 //парсер для чтения спецификации из xml
 
@@ -66,6 +67,7 @@ public:
     bool isExistTable(QString originalNameTable);                           //проверка на существование таблицы //memory: int+int
     TableSpecificate getTable(QString anyNameTable);                        //возвращает таблицу по ее имени, если талица не найдена, то вернется пустой тип
     void writeLog(Error error);
+    Error lastError() const;
 
 
 
