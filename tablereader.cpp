@@ -527,11 +527,11 @@ QList<int> TableReader::GetRanges(QString text)
 {
     QList<int> ranges;
 
-    QRegularExpression findRanges("(([ а-яА-Яa-zA-Z0-9.,/"+ QRegularExpression::escape("-") +"]+[^ а-яА-Яa-zA-Z0-9.,/"+ QRegularExpression::escape("-") +"])+)([ а-яА-Яa-zA-Z0-9.,/"+ QRegularExpression::escape("-") +"]+)");
+    QRegularExpression findRanges("(([ а-яА-Яa-zA-Z0-9.,/"+ QRegularExpression::escape("-") +"%]+[^ а-яА-Яa-zA-Z0-9.,/"+ QRegularExpression::escape("-") +"%])+)([ %а-яА-Яa-zA-Z0-9.,/"+ QRegularExpression::escape("-") +"]+)");
 
     QRegularExpressionMatch match=findRanges.match(text);
 
-    QRegularExpression findSubRanges("[ а-яА-Яa-zA-Z0-9.,/"+ QRegularExpression::escape("-") +"]+[^ а-яА-Яa-zA-Z0-9.,/"+ QRegularExpression::escape("-") +"]");
+    QRegularExpression findSubRanges("[ а-яА-Яa-zA-Z0-9.,/"+ QRegularExpression::escape("-") +"%]+[^ а-яА-Яa-zA-Z0-9.,/"+ QRegularExpression::escape("-") +"%]");
     QRegularExpressionMatchIterator iterator=findSubRanges.globalMatch(match.captured(1));
 
 
