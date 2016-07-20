@@ -72,6 +72,71 @@ Error IOLog::lastError() const
     return *_error;
 }
 
+void IOLog::writeSpec(TableSpecificate table)
+{
+    if(table.isEmpty()){
+        qDebug() << "пустая обертка";
+        return ;
+    }
+
+    tablesSpecificate.push_back(TableSpecificate());
+    for(int iterator_table = 0, length_table = table.columns.length(); iterator_table <length_table; iterator_table++){
+        tablesSpecificate.last().columns.push_back(ColumnSpecificate());
+        tablesSpecificate.last().columns.last().viewName = table.columns.at(iterator_table).viewName;
+        tablesSpecificate.last().columns.last().transliterateName = table.columns.at(iterator_table).transliterateName;
+        tablesSpecificate.last().columns.last().dataType = table.columns.at(iterator_table).dataType;
+//костыль {
+        tablesSpecificate.last().columns.last().isPrimaryKey = "yes";
+//костыль }
+    }
+    tablesSpecificate.last().originName = table.originName;
+    tablesSpecificate.last().transliterationName = table.transliterationName;
+
+
+    if(_specification.open(QIODevice::WriteOnly | QIODevice::Text)){
+        //file.seek(0);
+        QTextStream out(&_specification);
+        out.setCodec("UTF-8");
+        out << R"(<?xml version="1.0" encoding="UTF-8" ?>)" << endl << "<tables>" << endl;
+        for(int iterator_tables = 0, length_tables = tablesSpecificate.length(); iterator_tables < length_tables; iterator_tables++){
+            out << "<table>" <<endl
+                << "<tableNameOrigin>" << tablesSpecificate.at(iterator_tables).originName << "</tableNameOrigin>" << endl
+                << "<tableNameTransliterate>" << tablesSpecificate.at(iterator_tables).transliterationName << "</tableNameTransliterate>" << endl
+                << "<columns>" << endl;
+            for(int iterator_columns = 0, length_columns = tablesSpecificate.at(iterator_tables).columns.length(); iterator_columns < length_columns; iterator_columns++){
+                out << "<column>" << endl
+                    << "<columnNameView>" << tablesSpecificate.at(iterator_tables).columns.at(iterator_columns).viewName << "</columnNameView>" << endl
+                    << "<columnNameTransliterate>" << tablesSpecificate.at(iterator_tables).columns.at(iterator_columns).transliterateName << "</columnNameTransliterate>" << endl
+                    << "<dataType>" << tablesSpecificate.at(iterator_tables).columns.at(iterator_columns).dataType << "</dataType>" << endl
+/*костыль*/         << "<primaryKey>" << tablesSpecificate.at(iterator_tables).columns.at(iterator_columns).isPrimaryKey << "</primaryKey>" << endl
+                    << "</column>" << endl;
+            }
+            out << "</columns>" << endl
+                << "</table>" << endl;
+        }
+        out << "</tables>";
+    }
+    _specification.close();
+
+}
+
+void IOLog::writeSpec(QString originNameTable, QList<QPair<QString, QString> > columns)
+{
+    TableSpecificate table;
+    table.originName = originNameTable;
+    table.transliterationName = transliteration(originNameTable);
+
+    for(int iterator_columns = 0, length_columns = columns.length(); iterator_columns < length_columns; iterator_columns++){
+        table.columns.push_back(ColumnSpecificate());
+        table.columns.last().viewName = columns.at(iterator_columns).first;
+        table.columns.last().transliterateName = transliteration(columns.at(iterator_columns).first);
+        table.columns.last().dataType = columns.at(iterator_columns).second;
+/*ксотыль*/        table.columns.last().isPrimaryKey = "yes";
+    }
+    qDebug() << "передача в обертку завершена" << table.columns.length();
+    return writeSpec(table);
+}
+
 QStringList IOLog::readFile(QFile & file)
 {
     QStringList file_strings;
@@ -88,6 +153,35 @@ QStringList IOLog::readFile(QFile & file)
     }
     file.close();
     return file_strings;
+}
+
+QStringList IOLog::readFile(QUrl url)
+{
+    QFile file(url.toLocalFile());
+    return readFile(file);
+}
+
+QString IOLog::transliteration(QString text)
+{
+    QStringList nw_alphabet;
+    QString result = "";
+    QString rusLower = "абвгдеёжзийклмнопрстуфхцчшщыэюя -";
+    QString rusUpper = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЭЮЯ -";
+    QString validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_";
+    nw_alphabet << "a" << "b" << "v" << "g" << "d" << "e" << "e" << "j" << "z" << "i" << "i" << "k"
+                << "l" << "m" << "n" << "o" << "p" << "r" << "s" << "t" << "y" << "f" << "h" << "c"
+                << "ch" << "sh" << "sch" << "i" << "e" << "u" << "ya" << "_" << "_" ;
+    int count = text.length();
+    for(int i =0; i<count; i++){
+        QChar ch = text.at(i);
+        if(validChars.indexOf(ch) != -1)
+            result += ch;
+        else if(rusLower.indexOf(ch) != -1)
+            result += nw_alphabet.at(rusLower.indexOf(ch));
+        else if(rusUpper.indexOf(ch) != -1)
+            result += nw_alphabet.at(rusUpper.indexOf(ch));
+    }
+    return result.toLower();
 }
 
 void IOLog::readSpecificate()
@@ -144,6 +238,7 @@ void IOLog::readSpecificate()
         //вход в цикл колонок
         if(xml.name() == "columns" && length_tables == tablesSpecificate.length()){
             int length_columns = 0;
+
             for(token = xml.readNext(); (!xml.atEnd() || !xml.hasError()) && xml.name() != "columns"; token = xml.readNext()){
                 if(xml.name() == ""){
                     continue;
@@ -151,6 +246,9 @@ void IOLog::readSpecificate()
 
                 if(xml.name() == "column" && token != QXmlStreamReader::EndElement){
                     tablesSpecificate.last().columns.push_back(ColumnSpecificate());
+//костыль {
+                    tablesSpecificate.last().columns.last().isPrimaryKey = "yes";
+//костыль }
                     length_columns++;
                     continue;
                 }
@@ -180,12 +278,12 @@ void IOLog::readSpecificate()
                 }
 
                 //чтение определения ключа
-                if(xml.name() == "primaryKey" && tablesSpecificate.last().columns.last().isPrimaryKey.isEmpty() && length_columns == tablesSpecificate.last().columns.length()){
-                    token = xml.readNext();
-                    if(token != QXmlStreamReader::EndElement)
-                        tablesSpecificate.last().columns.last().isPrimaryKey = xml.text().toString();
-                    continue;
-                }
+//                if(xml.name() == "primaryKey" && tablesSpecificate.last().columns.last().isPrimaryKey.isEmpty() && length_columns == tablesSpecificate.last().columns.length()){
+//                    token = xml.readNext();
+//                    if(token != QXmlStreamReader::EndElement)
+//                        tablesSpecificate.last().columns.last().isPrimaryKey = xml.text().toString();
+//                    continue;
+//                }
             }
         }
     }

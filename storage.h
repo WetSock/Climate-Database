@@ -47,7 +47,7 @@ public:
     //bool updateData(QString nameTable);
 
     QStringList namesTables();
-    QString transliteration(QString); //целесообразность данного метода необходимо пересмотреть
+
 
 private:
     bool isExistTable(QString nameTable); //проверка по любому из имен на существование таблицы в БД //+

@@ -1,29 +1,6 @@
 #include "storage.h"
 
 
-QString Storage::transliteration(QString text)
-{
-    QStringList nw_alphabet;
-    QString result = "";
-    QString rusLower = "абвгдеёжзийклмнопрстуфхцчшщыэюя -";
-    QString rusUpper = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЭЮЯ -";
-    QString validChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_";
-    nw_alphabet << "a" << "b" << "v" << "g" << "d" << "e" << "e" << "j" << "z" << "i" << "i" << "k"
-                << "l" << "m" << "n" << "o" << "p" << "r" << "s" << "t" << "y" << "f" << "h" << "c"
-                << "ch" << "sh" << "sch" << "i" << "e" << "u" << "ya" << "_" << "_" ;
-    int count = text.length();
-    for(int i =0; i<count; i++){
-        QChar ch = text.at(i);
-        if(validChars.indexOf(ch) != -1)
-            result += ch;
-        else if(rusLower.indexOf(ch) != -1)
-                result += nw_alphabet.at(rusLower.indexOf(ch));
-            else if(rusUpper.indexOf(ch) != -1)
-                    result += nw_alphabet.at(rusUpper.indexOf(ch));
-    }
-    return result.toLower();
-}
-
 QString Storage::quotes(QString data, QString type)
 {
     if(type == "TEXT")
@@ -175,6 +152,10 @@ bool Storage::writeData(QString nameTable, QList<QList<QString> > values)
         }
     }
 
+    bool transact_use = false;
+    if(_dataBase.transaction()){
+        transact_use = true;
+    }
     TableSpecificate spec = _iolog->getTable(nameTable); //Валидность уже проверена в isExitentTable
     for(int iterator_strs = 0, strs_length = values.length(); iterator_strs < strs_length; iterator_strs++){ //Будет пройдена каждая строка
         QString insert_columns = "";
@@ -194,8 +175,18 @@ bool Storage::writeData(QString nameTable, QList<QList<QString> > values)
         QSqlQuery query;
         if(!query.exec(request)){
             qDebug() << "Запрос был отклонен: " << query.lastQuery() << endl << query.lastError();
+            //если запрос зафейлился в транзакции, то транзакция откатывается и производится запись без нее с откатом счетчика для целостночсти передачи
+            if(transact_use){
+                _dataBase.rollback();
+                transact_use = false;
+                iterator_strs = 0;
+                qDebug() << "transact fail - recoil";
+            }
             //здесь ретурн не надо ибо запросов тьма
         }
+    }
+    if(!_dataBase.commit()){
+        qDebug() << "феил транзакции";
     }
     qDebug() << "write ok";
     return true;

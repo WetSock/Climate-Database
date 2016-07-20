@@ -1,261 +1,297 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <tables>
-	<table>
-		<tableNameOrigin>ТЕМПЕРАТУРА  ВОЗДУХА  И  ПОВЕРХНОСТИ  ПОЧВЫ</tableNameOrigin>
-		<tableNameTransliterate>temperatyra__vozdyha__i__poverhnosti__pochvi</tableNameTransliterate>
-		
-		<columns>
-			<column>
-				<columnNameView>Выпуск</columnNameView>
-				<columnNameTransliterate>сolname1</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>yes</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Год</columnNameView>
-				<columnNameTransliterate>сolname2</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>yes</primaryKey>
-			</column>	
-			<column>
-				<columnNameView>Месяц</columnNameView>
-				<columnNameTransliterate>сolname3</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>yes</primaryKey>
-			</column>	
-			
-			<column>
-				<columnNameView>Станция</columnNameView>
-				<columnNameTransliterate>сolname4</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>yes</primaryKey>
-			</column>			
-			<column>
-				<columnNameView>Сред.</columnNameView>
-				<columnNameTransliterate>сolname5</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Макс.</columnNameView>
-				<columnNameTransliterate>сolname6</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Мин.</columnNameView>
-				<columnNameTransliterate>сolname7</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Абс. макс.</columnNameView>
-				<columnNameTransliterate>сolname8</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Дата</columnNameView>
-				<columnNameTransliterate>сolname9</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Абс. мин.</columnNameView>
-				<columnNameTransliterate>сolname10</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Дата</columnNameView>
-				<columnNameTransliterate>сolname11</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Без оттепели</columnNameView>
-				<columnNameTransliterate>сolname12</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>С морозом</columnNameView>
-				<columnNameTransliterate>сolname13</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Сред</columnNameView>
-				<columnNameTransliterate>сolname14</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Макс</columnNameView>
-				<columnNameTransliterate>сolname15</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Мин</columnNameView>
-				<columnNameTransliterate>сolname16</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Абс. макс</columnNameView>
-				<columnNameTransliterate>сolname17</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Дата</columnNameView>
-				<columnNameTransliterate>сolname18</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Абс. мин</columnNameView>
-				<columnNameTransliterate>сolname19</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Дата</columnNameView>
-				<columnNameTransliterate>сolname20</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Число дей с морозом</columnNameView>
-				<columnNameTransliterate>сolname21</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-
-			
-			
-		</columns>
-	
-	</table>
-	
-	<table>
-		<tableNameOrigin>ВЛАЖНОСТЬ  ВОЗДУХА</tableNameOrigin>
-		<tableNameTransliterate>vlajnost__vozdyha</tableNameTransliterate>
-		
-		<columns>
-			<column>
-				<columnNameView>Выпуск</columnNameView>
-				<columnNameTransliterate>сolname1</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>yes</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Год</columnNameView>
-				<columnNameTransliterate>сolname2</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>yes</primaryKey>
-			</column>	
-			<column>
-				<columnNameView>Месяц</columnNameView>
-				<columnNameTransliterate>сolname3</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>yes</primaryKey>
-			</column>	
-			
-			<column>
-				<columnNameView>Станция</columnNameView>
-				<columnNameTransliterate>сolname4</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>yes</primaryKey>
-			</column>			
-			<column>
-				<columnNameView>Сред.</columnNameView>
-				<columnNameTransliterate>сolname5</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Абс. макс.</columnNameView>
-				<columnNameTransliterate>сolname6</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Дата</columnNameView>
-				<columnNameTransliterate>сolname7</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Абс. мин.</columnNameView>
-				<columnNameTransliterate>сolname8</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Дата</columnNameView>
-				<columnNameTransliterate>сolname9</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Сред.</columnNameView>
-				<columnNameTransliterate>сolname10</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Абс. миним.</columnNameView>
-				<columnNameTransliterate>сolname11</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Дата</columnNameView>
-				<columnNameTransliterate>сolname12</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Не более 30</columnNameView>
-				<columnNameTransliterate>сolname13</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Не менее 80</columnNameView>
-				<columnNameTransliterate>сolname14</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Сред.</columnNameView>
-				<columnNameTransliterate>сolname15</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Абс. макс</columnNameView>
-				<columnNameTransliterate>сolname16</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Дата</columnNameView>
-				<columnNameTransliterate>сolname17</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-			<column>
-				<columnNameView>Температура точки росы сред. град</columnNameView>
-				<columnNameTransliterate>сolname18</columnNameTransliterate>
-				<dataType>TEXT</dataType>
-				<primaryKey>no</primaryKey>
-			</column>
-
-			
-		</columns>
-	
-	</table>
+<table>
+<tableNameOrigin>ТЕМПЕРАТУРА  ВОЗДУХА  И  ПОВЕРХНОСТИ  ПОЧВЫ</tableNameOrigin>
+<tableNameTransliterate>temperatyra__vozdyha__i__poverhnosti__pochvi</tableNameTransliterate>
+<columns>
+<column>
+<columnNameView>Выпуск</columnNameView>
+<columnNameTransliterate>сolname1</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Год</columnNameView>
+<columnNameTransliterate>сolname2</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Месяц</columnNameView>
+<columnNameTransliterate>сolname3</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Станция</columnNameView>
+<columnNameTransliterate>сolname4</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Сред.</columnNameView>
+<columnNameTransliterate>сolname5</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Макс.</columnNameView>
+<columnNameTransliterate>сolname6</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Мин.</columnNameView>
+<columnNameTransliterate>сolname7</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Абс. макс.</columnNameView>
+<columnNameTransliterate>сolname8</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Дата</columnNameView>
+<columnNameTransliterate>сolname9</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Абс. мин.</columnNameView>
+<columnNameTransliterate>сolname10</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Дата</columnNameView>
+<columnNameTransliterate>сolname11</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Без оттепели</columnNameView>
+<columnNameTransliterate>сolname12</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>С морозом</columnNameView>
+<columnNameTransliterate>сolname13</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Сред</columnNameView>
+<columnNameTransliterate>сolname14</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Макс</columnNameView>
+<columnNameTransliterate>сolname15</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Мин</columnNameView>
+<columnNameTransliterate>сolname16</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Абс. макс</columnNameView>
+<columnNameTransliterate>сolname17</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Дата</columnNameView>
+<columnNameTransliterate>сolname18</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Абс. мин</columnNameView>
+<columnNameTransliterate>сolname19</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Дата</columnNameView>
+<columnNameTransliterate>сolname20</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Число дей с морозом</columnNameView>
+<columnNameTransliterate>сolname21</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+</columns>
+</table>
+<table>
+<tableNameOrigin>ВЛАЖНОСТЬ  ВОЗДУХА</tableNameOrigin>
+<tableNameTransliterate>vlajnost__vozdyha</tableNameTransliterate>
+<columns>
+<column>
+<columnNameView>Выпуск</columnNameView>
+<columnNameTransliterate>сolname1</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Год</columnNameView>
+<columnNameTransliterate>сolname2</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Месяц</columnNameView>
+<columnNameTransliterate>сolname3</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Станция</columnNameView>
+<columnNameTransliterate>сolname4</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Сред.</columnNameView>
+<columnNameTransliterate>сolname5</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Абс. макс.</columnNameView>
+<columnNameTransliterate>сolname6</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Дата</columnNameView>
+<columnNameTransliterate>сolname7</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Абс. мин.</columnNameView>
+<columnNameTransliterate>сolname8</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Дата</columnNameView>
+<columnNameTransliterate>сolname9</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Сред.</columnNameView>
+<columnNameTransliterate>сolname10</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Абс. миним.</columnNameView>
+<columnNameTransliterate>сolname11</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Дата</columnNameView>
+<columnNameTransliterate>сolname12</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Не более 30</columnNameView>
+<columnNameTransliterate>сolname13</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Не менее 80</columnNameView>
+<columnNameTransliterate>сolname14</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Сред.</columnNameView>
+<columnNameTransliterate>сolname15</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Абс. макс</columnNameView>
+<columnNameTransliterate>сolname16</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Дата</columnNameView>
+<columnNameTransliterate>сolname17</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>Температура точки росы сред. град</columnNameView>
+<columnNameTransliterate>сolname18</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+</columns>
+</table>
+<table>
+<tableNameOrigin>Имечко</tableNameOrigin>
+<tableNameTransliterate>imechko</tableNameTransliterate>
+<columns>
+<column>
+<columnNameView>колонка1</columnNameView>
+<columnNameTransliterate>kolonka1</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>колонка2</columnNameView>
+<columnNameTransliterate>kolonka2</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>колонка 3</columnNameView>
+<columnNameTransliterate>kolonka_3</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+</columns>
+</table>
+<table>
+<tableNameOrigin>Имечко</tableNameOrigin>
+<tableNameTransliterate>imechko</tableNameTransliterate>
+<columns>
+<column>
+<columnNameView>колонка1</columnNameView>
+<columnNameTransliterate>kolonka1</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>колонка2</columnNameView>
+<columnNameTransliterate>kolonka2</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+<column>
+<columnNameView>колонка 3</columnNameView>
+<columnNameTransliterate>kolonka_3</columnNameTransliterate>
+<dataType>TEXT</dataType>
+<primaryKey>yes</primaryKey>
+</column>
+</columns>
+</table>
 </tables>

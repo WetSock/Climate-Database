@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QtXml>
+#include <QPair>
 
 struct ColumnSpecificate{
     QString viewName;
@@ -69,7 +70,13 @@ public:
     void writeLog(Error error);
     Error lastError() const;
 
+    void writeSpec(TableSpecificate table); //здесь уже сгенеренные имена подаются
+    void writeSpec(QString originNameTable, QList<QPair<QString,QString>> columns); // first - viewNameColumn, second - dataType
 
+    QStringList readFile(QFile & file);//перегруженный метод
+    QStringList readFile(QUrl url);
+
+    QString transliteration(QString);
 
 signals:
     void errorOut(const Error error); //для получения ошибки во вне необходимо законнектиться к этому сигналу
@@ -77,7 +84,7 @@ signals:
 
 public slots:
     void errorProgram(Error error, Message message); //метод для обработки ошибок
-    QStringList readFile(QFile & file);
+
 
 
 };
