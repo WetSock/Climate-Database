@@ -254,8 +254,8 @@ TableData TableReader::GetNextTable()
 
     QString text;
     QRegularExpressionMatch match;
-    QRegularExpression NOTAFUCKINGTABLE("Таблица *([0-9]+). *([0-9а-яА-Я " + minus + ",.()]+)[.]{2,}"); // Как же я устал...
-    QRegularExpression tableSearch("Таблица *([0-9]+). *([0-9а-яА-Я " + minus + ",.()]+)");
+    QRegularExpression NOTAFUCKINGTABLE("Таблица *([0-9]+)a?. *([0-9а-яА-Я " + minus + ",.()]+)[.]{2,}"); // Как же я устал...
+    QRegularExpression tableSearch("Таблица *([0-9]+)a?. *([0-9а-яА-Я " + minus + ",.()]+)");
     //    QRegularExpression dataString(" *[0-9]+[.] *[а-яА-Я ,.]+");
 
     while (index<datafile.length()){ // Поиск объявления таблицы
