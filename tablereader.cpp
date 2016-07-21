@@ -1,6 +1,7 @@
 #include "tablereader.h"
 #include <QRegularExpression>
 #include <QDebug>
+#include <QFile>
 
 
 bool TableReader::SetData(QList<QString> _data)
@@ -465,6 +466,34 @@ QList<TableData> TableReader::GetAllTables()
     {
         allTables << GetNextTable();
     }
+
+    // Запись в файл всех "неправильных" строк для облегчения исправления ошибок
+
+    QFile wrongStringsOutput("Wrong strings.txt");
+    TableData table;
+
+    if(wrongStringsOutput.open( QIODevice::Append | QIODevice::Text)){
+        QTextStream out(&wrongStringsOutput);
+
+        int i=0;
+        while (i<allTables.length())
+        {
+            table=allTables.at(i);
+
+            if (table.wrongStrings.length()>0)
+            {
+                out << endl << table.tableNumber << ".   "<< table.tableName << " Month " << table.month << " Year  " << table.year << " Edition  " << table.edition << endl << endl;
+                for (int iter=0;iter<table.wrongStrings.length();iter++)
+                {
+                    out << table.wrongStrings.at(iter) << endl;
+                }
+            }
+            i++;
+        }
+    }
+    else qDebug() << "Can't open file <Wrong strings.txt>" << endl;
+
+    wrongStringsOutput.close();
     index=0;
     return allTables;
 }
