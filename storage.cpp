@@ -245,7 +245,8 @@ bool Storage::createTable(QString nameTable)
 
     TableSpecificate spec = _iolog->getTable(nameTable); //Валидность уже проверена в isExistTable
     if(spec.isEmpty()){
-        //если такого нет в спецификации
+        //если такого нет в спецификации, то надо внести в список неизвестных
+
         return false;
     }
     QString sub_request = "";
@@ -261,12 +262,13 @@ bool Storage::createTable(QString nameTable)
         }
 
         sub_request += spec.columns.at(iterator).transliterateName + " " + spec.columns.at(iterator).dataType;
-        if(spec.columns.at(iterator).isPrimaryKey == "yes"){
+        //удаление раздела ключа в спецификации
+        //if(spec.columns.at(iterator).isPrimaryKey == "yes"){
             if(primaryKeys != ""){
                 primaryKeys += ", ";
             }
             primaryKeys += spec.columns.at(iterator).transliterateName;
-        }
+        //}
     }
 
     if(primaryKeys != ""){

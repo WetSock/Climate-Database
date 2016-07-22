@@ -10,6 +10,7 @@
 #include <QFileDialog>
 #include <QUrl>
 #include <QtWidgets>
+#include <QDialog>
 
 class Interface : public QWidget
 {
@@ -26,11 +27,16 @@ class Interface : public QWidget
 
     //вспомогательные элементы
     QList<QAction *>    _menuActions; //хранит действия меню //освобождать память дерективой delete НЕ нужно
+    QDialog             _tableCreator;
+    QList<QObject*>     _tableCreatorWidgets; //необходимо высвобождать память
+    //QFrame *            _creatorFrame;
 
     QMessageBox         _messageBox;
     IOLog               _iolog;
     DataConnection      _dataConnection;
     Storage             _storage;// = Storage(_iolog, _table, _dataConnection, parent); //внесение объекта работы с файловой системой и виджета для вывода таблицы
+
+
 
 
 public:
@@ -54,10 +60,15 @@ public slots:
 
     void setMessageBox(const Error error);
 
+    void tableCreator();
+    void clearCreator();
+    void paintCreator(QString);
+    void applyCreator();
+
 
 
 signals:
-
+    void crashCommand();
 
 };
 

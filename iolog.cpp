@@ -12,28 +12,35 @@ IOLog::~IOLog()
 }
 
 
-void IOLog::start()
+bool IOLog::start()
 {
-    QFile configuration;
-    configuration.setFileName(QCoreApplication::applicationDirPath() + "/configs.configurate"); //статический путь до файла конфигурации
-    QStringList conf_strings = readFile(configuration);
-    if(conf_strings.length() >= 2){ //spec, log, convertToTxt, convertToCSV
-        _specification.setFileName(QCoreApplication::applicationDirPath() + conf_strings.at(0));
-        readSpecificate();
-//        foreach(TableSpecificate table, tablesSpecificate){
-//            qDebug() << table.originName << table.transliterationName;
-//            foreach(ColumnSpecificate column, table.columns){
-//                qDebug() << column.viewName << column.transliterateName << column.dataType << column.isPrimaryKey;
-//            }
-//            qDebug() << endl;
-//        }
-        _log.setFileName(QCoreApplication::applicationDirPath() + conf_strings.at(1));
-        if(!_log.open(QIODevice::Append | QIODevice::Text)){
-            errorProgram(Error("IOLog","start","лог файл не может быть открыт"), MSG_CONNECTED_QDEBUG);
+    QStringList conf_strings = readFile(QCoreApplication::applicationDirPath() + "/configs.configurate"); //получение строк файла конфигурации
+    for(int iterator_conf = 0, length_iterator = conf_strings.length(); iterator_conf < length_iterator; iterator_conf++){
+        QString url;
+        url.toUtf8();
+        if(QUrl(conf_strings.at(iterator_conf)).isRelative()){
+            //если путь относительный - делаем его абсолютным
+            url = QCoreApplication::applicationDirPath() + conf_strings.at(iterator_conf);
+        }
+        //запись путей в соответствующие файлы
+        switch(iterator_conf){
+        case 0:  _specification.setFileName(url); break;
+        case 1:  _log.setFileName(url); break;
+        default: qDebug() << "В файле конфигурации есть не декларированные строки";
         }
     }
-    //else
-    //    errorProgram(Error("IOLog", "start", "Файл конфигурации не отвечает внутреним стандартам"), MSG_CONNECTED_QDEBUG);
+
+    if(!_specification.exists()){
+        qDebug() << "Файл спецификации не существует по заданному пути в конфигурации";
+        return false;
+    }
+
+    if(!_log.exists() || !_log.open(QIODevice::Append | QIODevice::Text)){
+        errorProgram(Error("IOLog","start","лог файл не может быть открыт"), MSG_CONNECTED_QDEBUG);
+    }
+
+    readSpecificate();
+    return true;
 }
 
 bool IOLog::isExistTable(QString originalNameTable)
@@ -62,7 +69,6 @@ void IOLog::writeLog(Error error)
         errorProgram(Error("IOLog","writeLog","Вывод в лог не возможен: файл закрыт"), MSG_QDEBUG);
         return;
     }
-    //_log.seek(0);
     static QTextStream out(&_log);
     out << endl << "Error:   " << error.errorClass << "::" << error.errorMethod << endl << error.text << endl;
 }
@@ -82,18 +88,15 @@ void IOLog::writeSpec(TableSpecificate table)
     tablesSpecificate.push_back(TableSpecificate());
     for(int iterator_table = 0, length_table = table.columns.length(); iterator_table <length_table; iterator_table++){
         tablesSpecificate.last().columns.push_back(ColumnSpecificate());
-        tablesSpecificate.last().columns.last().viewName = table.columns.at(iterator_table).viewName;
-        tablesSpecificate.last().columns.last().transliterateName = table.columns.at(iterator_table).transliterateName;
-        tablesSpecificate.last().columns.last().dataType = table.columns.at(iterator_table).dataType;
-//костыль {
-        tablesSpecificate.last().columns.last().isPrimaryKey = "yes";
-//костыль }
+        tablesSpecificate.last().columns.last().viewName =              table.columns.at(iterator_table).viewName;
+        tablesSpecificate.last().columns.last().transliterateName =     table.columns.at(iterator_table).transliterateName;
+        tablesSpecificate.last().columns.last().dataType =              table.columns.at(iterator_table).dataType;
     }
     tablesSpecificate.last().originName = table.originName;
     tablesSpecificate.last().transliterationName = table.transliterationName;
 
 
-    if(_specification.open(QIODevice::WriteOnly | QIODevice::Text)){
+    if(_specification.exists() &&_specification.open(QIODevice::WriteOnly | QIODevice::Text)){
         //file.seek(0);
         QTextStream out(&_specification);
         out.setCodec("UTF-8");
@@ -108,15 +111,18 @@ void IOLog::writeSpec(TableSpecificate table)
                     << "<columnNameView>" << tablesSpecificate.at(iterator_tables).columns.at(iterator_columns).viewName << "</columnNameView>" << endl
                     << "<columnNameTransliterate>" << tablesSpecificate.at(iterator_tables).columns.at(iterator_columns).transliterateName << "</columnNameTransliterate>" << endl
                     << "<dataType>" << tablesSpecificate.at(iterator_tables).columns.at(iterator_columns).dataType << "</dataType>" << endl
-/*костыль*/         << "<primaryKey>" << tablesSpecificate.at(iterator_tables).columns.at(iterator_columns).isPrimaryKey << "</primaryKey>" << endl
                     << "</column>" << endl;
             }
             out << "</columns>" << endl
                 << "</table>" << endl;
         }
         out << "</tables>";
+        _specification.close();
     }
-    _specification.close();
+    else{
+        qDebug() << "файл специфкации не может быть модифицирован: файл закрыт. Все изменения в силе только для текущей сессии, после выхода из программы внесенные данные будут удалены";
+    }
+
 
 }
 
@@ -128,10 +134,9 @@ void IOLog::writeSpec(QString originNameTable, QList<QPair<QString, QString> > c
 
     for(int iterator_columns = 0, length_columns = columns.length(); iterator_columns < length_columns; iterator_columns++){
         table.columns.push_back(ColumnSpecificate());
-        table.columns.last().viewName = columns.at(iterator_columns).first;
-        table.columns.last().transliterateName = transliteration(columns.at(iterator_columns).first);
-        table.columns.last().dataType = columns.at(iterator_columns).second;
-/*ксотыль*/        table.columns.last().isPrimaryKey = "yes";
+        table.columns.last().viewName =             columns.at(iterator_columns).first;
+        table.columns.last().transliterateName =    "column" + QString::number(iterator_columns);//transliteration(columns.at(iterator_columns).first) + QString;
+        table.columns.last().dataType =             columns.at(iterator_columns).second;
     }
     qDebug() << "передача в обертку завершена" << table.columns.length();
     return writeSpec(table);
@@ -148,7 +153,6 @@ QStringList IOLog::readFile(QFile & file)
         }
     }
     else{
-        //showErrorView("Файл не был найден: " + file.fileName());
         errorProgram(Error("IOLog", "readFile", "Файл не был найден: " + file.fileName()), MSG_CONNECTED_QDEBUG);
     }
     file.close();
@@ -158,6 +162,12 @@ QStringList IOLog::readFile(QFile & file)
 QStringList IOLog::readFile(QUrl url)
 {
     QFile file(url.toLocalFile());
+    return readFile(file);
+}
+
+QStringList IOLog::readFile(QString url)
+{
+    QFile file(url);
     return readFile(file);
 }
 
@@ -247,7 +257,7 @@ void IOLog::readSpecificate()
                 if(xml.name() == "column" && token != QXmlStreamReader::EndElement){
                     tablesSpecificate.last().columns.push_back(ColumnSpecificate());
 //костыль {
-                    tablesSpecificate.last().columns.last().isPrimaryKey = "yes";
+//                    tablesSpecificate.last().columns.last().isPrimaryKey = "yes";
 //костыль }
                     length_columns++;
                     continue;
@@ -288,6 +298,27 @@ void IOLog::readSpecificate()
         }
     }
     _specification.close();
+}
+
+QList<QPair<QString, int> > IOLog::getUnidentifiedTables() const
+{
+    return unidentifiedTables;
+}
+
+void IOLog::addUnidentifiedTables(QString OriginNameTable, int count_columns)
+{
+    for(int iterator_unid = 0, length_unid = unidentifiedTables.length(); iterator_unid < length_unid; iterator_unid++){
+        if(unidentifiedTables.at(iterator_unid).first == OriginNameTable){
+            return;
+        }
+    }
+    unidentifiedTables.append(QPair<QString, int>(OriginNameTable, count_columns));
+}
+
+bool IOLog::clearUnidentifiedTables()
+{
+    unidentifiedTables.clear();
+    return true;
 }
 
 void IOLog::errorProgram(Error error, Message message)

@@ -11,9 +11,9 @@ struct ColumnSpecificate{
     QString viewName;
     QString transliterateName;
     QString dataType;
-    QString isPrimaryKey;
+    //QString isPrimaryKey;
     bool isEmpty(){
-        if(viewName == "" || transliterateName == "" || dataType == "" || isPrimaryKey == ""){
+        if(viewName == "" || transliterateName == "" || dataType == ""){ // || isPrimaryKey == ""){
             return true;
         }
         return false;
@@ -60,11 +60,13 @@ class IOLog : public QObject
 
     void readSpecificate();                                                 //парсер для чтения спецификации из xml
 
+    QList<QPair<QString,int>> unidentifiedTables;
+
 public:
     explicit IOLog(QObject *parent = 0);
     ~IOLog();
 
-    void start();                                                           //вынесенный код из конструктора для возможности получения ошибок чтения файла конфигурации
+    bool start();                                                           //вынесенный код из конструктора для возможности получения ошибок чтения файла конфигурации
     bool isExistTable(QString originalNameTable);                           //проверка на существование таблицы //memory: int+int
     TableSpecificate getTable(QString anyNameTable);                        //возвращает таблицу по ее имени, если талица не найдена, то вернется пустой тип
     void writeLog(Error error);
@@ -75,8 +77,15 @@ public:
 
     QStringList readFile(QFile & file);//перегруженный метод
     QStringList readFile(QUrl url);
+    QStringList readFile(QString url);
 
     QString transliteration(QString);
+
+
+
+    QList<QPair<QString, int> > getUnidentifiedTables() const;
+    void addUnidentifiedTables(QString, int);
+    bool clearUnidentifiedTables();
 
 signals:
     void errorOut(const Error error); //для получения ошибки во вне необходимо законнектиться к этому сигналу
