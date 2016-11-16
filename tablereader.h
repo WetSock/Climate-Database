@@ -1,14 +1,16 @@
 #ifndef TABLEREADER_H
 #define TABLEREADER_H
 
+#include <QObject>
 #include <QRegularExpression>
+#include "specificator.h" //<<-----------
 
 struct TableData{
     int tableNumber=0;
     QString tableName="";
-    QList<QString> tableStrings;
-    QList<QString> wrongStrings;
-    QList<QList<QString>> dividedData;
+    QStringList tableStrings;
+    QStringList wrongStrings;
+    QList<QStringList> dividedData;
     QList<int> ranges,
                headerPosition;
     int month = 0,
@@ -18,9 +20,13 @@ struct TableData{
         headerLength;
 };
 
-class TableReader
+class TableReader : public QObject
 {
-    QList<QString> datafile;
+    Q_OBJECT
+
+    Specificator * _spec = Q_NULLPTR; //<<-----------
+
+    QStringList datafile;
     int index=0;
     QString minus = QRegularExpression::escape("-");
     TableData GetDataFromTable(TableData);
@@ -28,16 +34,23 @@ class TableReader
     int GetCurrentIndex();
     QString GetCurrentString();
     QList<int> GetRanges(QString);
-    QList<QString> GetTableNames();
+    QStringList GetTableNames();
+    QList<QStringList> MultipleStrings(QStringList, QRegularExpressionMatch, int, QString);
+    TableData GetDataFrom9Table(TableData, QRegularExpression);
+    QString GetPatternForTable(QList<int>);
+    QString CutProvod(QString);
+    QString CutStationNumber(QString);
 public:
-    bool SetData(QList<QString>); // Запись строк файла в класс
+    bool SetData(QStringList); // Запись строк файла в класс
     TableData GetNextTable();  // Получение следующей таблицы
     TableData GetTableByName(QString); // Получение таблицы по названию
     QList<TableData> GetAllTables(); // Получение списка всех таблиц
-    bool ShowDividedTable(QList<QList<QString>>); // Вывод отформатированных данных из таблицы в консоль
+    bool ShowDividedTable(QList<QStringList>); // Вывод отформатированных данных из таблицы в консоль
     bool ShowTables(QList<TableData>); // Вывод исходных строк (с необработанными данными) всех таблиц
     QList<TableData> AddYearAndEdition(); // Получение всех таблиц, где в данные нагло впихнуты месяц, год и выпуск
-    TableReader();
+    explicit TableReader(QObject *parent = 0);
+
+    void setSpec(Specificator & spec); //<<-----------
 };
 
 #endif // TABLEREADER_H
