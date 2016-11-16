@@ -4,7 +4,7 @@
 #include <QFile>
 
 
-bool TableReader::SetData(QList<QString> _data)
+bool TableReader::SetData(QStringList _data)
 {
     datafile=_data;
     return true;
@@ -14,187 +14,73 @@ TableData TableReader::GetDataFromTable(TableData table)
 {
     if (table.ranges.length()>0)
     {
-        QRegularExpression regExpForTable;
-        int i=0,j=0;
+        QRegularExpression regExpForTable(GetPatternForTable(table.ranges));
+        QString text,pattern;
 
-        QString pattern="";
-        while (i<table.ranges.length()-1) // -1 потому что в последней колонке бывает на символ меньше
-        {
-            pattern = pattern + "(.{" + QString::number((table.ranges.at(i++))-1) + "})( |$)";
-        }
-
-        pattern = pattern + "(.{" + QString::number((table.ranges.at(i++))-1) + "}.{0,2})( |$)";
-
-        regExpForTable.setPattern(pattern);
-        QString text;
-
-        if (table.headers==1)
-        {
-            QString varFor9Table;// Переменная, которая нужна для записи в 9 таблицу названия пункта
-
-            i=0; // Итератор для считывания всех строк таблицы
-            while (i<table.tableStrings.length())
-            {
-                text=table.tableStrings.at(i);
-
-                // Для начала убираем из строки слова про посторонние провода и переходы
+        if (table.tableNumber==9)
+            table=GetDataFrom9Table(table, regExpForTable);
+        else
+        for(int j=0;j<table.headers;j++){  // Работа поочередно с каждым набором данных в таблице
+            for(int i=0;i<table.tableStrings.length();i++){ // Работа с каждой строкой
+                if (table.headers==1) // Если таблица одна, то оставляем полную строку
                 {
-                    QRegularExpression postProvod("(.+)(Пост.провод)(.+)");
-                    QRegularExpression perehod("(.+)(Переход.+месяца?)(.*)");
-                    QRegularExpressionMatch postProvodMatch=postProvod.match(text);
-                    QRegularExpressionMatch perehodMatch=perehod.match(text);
-                    if (postProvodMatch.hasMatch())
-                    {
-                        text = postProvodMatch.captured(1);
-                        for (int i=0;i<postProvodMatch.capturedLength(2);i++)
-                        {
-                            text+= " ";
-                        }
-                        text += postProvodMatch.captured(3);
-                    }
-                    if (perehodMatch.hasMatch())
-                    {
-                        text = perehodMatch.captured(1);
-                        for (int i=0;i<perehodMatch.capturedLength(2);i++)
-                        {
-                            text+= " ";
-                        }
-                        text += perehodMatch.captured(3);
-                    }
+                    text=table.tableStrings.at(i);
+                }
+                else // Иначе обрезаем её
+                {
+                    pattern=".{"+ QString::number(table.headerPosition.at(j)) +"}(.{" + QString::number(table.headerLength) +"})";
+                    QRegularExpression oneTablePerString(pattern);
+                    text=oneTablePerString.match(table.tableStrings.at(i)).captured(1); // Берем из строки только нужную таблицу
                 }
 
-                // Извлечение данных из строки
-                QRegularExpressionMatch match=regExpForTable.match(text);
-                QRegularExpression onlySpaces("^ +$");
-                QRegularExpression withoutSpaces("^( *)(.*[^ \f\n\r\t\v]+)( *)$");
+                text=CutProvod(text);
+                text=CutStationNumber(text);
 
-                if (match.hasMatch()) // Для строки с данными соответсвующими колонкам
+                // Тут добавляем пробелы, потому что иначе некоторые строки оказываются слишком короткими
+                QRegularExpressionMatch myMatch=regExpForTable.match(text+"                                                                                                                                                                 "); // ДА ЗДРАВСТВУЮТ КОСТЫЛИ!!!                
+                QRegularExpression meaninglessString("^[ _-]*$");
+
+                if (!meaninglessString.match(text).hasMatch()) // Если сторока с чем-то полезным
                 {
-                    QList<QString> dataFromString;
-
-                    // Отдельная обработка 9 таблицы, в которую криво занесли данные (как так можно?)
-                    if (table.tableNumber==9)
-                    {
-                        dataFromString << varFor9Table;
-                    }
-
-                    int k=1; // Итератор для данных в строке
-                    while (k<match.lastCapturedIndex()+1)
-                    {
-                        if (onlySpaces.match(match.captured(k)).hasMatch())  // Если данных нет, записать _
-                        {
-                            dataFromString << "_";
-                        }
-                        else // Иначе записать данные без пробелов по бокам
-                        {
-                            dataFromString << withoutSpaces.match(match.captured(k)).captured(2);
-                        }
-                        k+=2;
-                    }
-                    table.dividedData << dataFromString; // Запись данных из строки в структуру
-                }
-                else // Для строк, в которых "плохие" данные
-                {
-                    if (table.tableNumber==9)
-                    {
-                        //qDebug() << "" << text << endl;
-                        QRegularExpression stationName("[0-9]{1,3}.[ а-яА-Яa-zA-Z0-9" + minus + "]+");
-                        if (stationName.match(text).hasMatch())
-                        {
-                            varFor9Table=stationName.match(text).captured();
-                        }
-                        else table.wrongStrings << text;
-                    }
-                    else
-                        table.wrongStrings << text;
-                }
-                i++;
-            }
-        }
-        else // Если в строке сразу несколько таблиц
-        {
-            while (j<table.headers)  // Работа поочередно с каждым набором данных в таблице
-            {
-                pattern=".{"+ QString::number(table.headerPosition.at(j++)) +"}(.{" + QString::number(table.headerLength) +"})";
-                QRegularExpression oneTablePerString(pattern);
-                i=0;
-                QString varFor9Table;// Переменная, которая нужна для записи в 9 таблицу названия пункта
-                while (i<table.tableStrings.length())
-                {
-                    text=oneTablePerString.match(table.tableStrings.at(i++)).captured(1); // Берем из строки только нужную таблицу
-
-                    // Для начала убираем из строки слова про посторонние провода и переходы
-                    {
-                        QRegularExpression postProvod("(.+)(Пост.провод)(.+)");
-                        QRegularExpression perehod("(.+)(Переход.+месяца?)(.*)");
-                        QRegularExpressionMatch postProvodMatch=postProvod.match(text);
-                        QRegularExpressionMatch perehodMatch=perehod.match(text);
-                        if (postProvodMatch.hasMatch())
-                        {
-                            text = postProvodMatch.captured(1);
-                            for (int i=0;i<postProvodMatch.capturedLength(2);i++)
-                            {
-                                text+= " ";
-                            }
-                            text += postProvodMatch.captured(3);
-                        }
-                        if (perehodMatch.hasMatch())
-                        {
-                            text = perehodMatch.captured(1);
-                            for (int i=0;i<perehodMatch.capturedLength(2);i++)
-                            {
-                                text+= " ";
-                            }
-                            text += perehodMatch.captured(3);
-                        }
-                    }
-
-                    // Извлечение данных из строки
-                    QRegularExpressionMatch match=regExpForTable.match(text);
                     QRegularExpression onlySpaces("^ +$");
                     QRegularExpression withoutSpaces("^( *)(.*[^ \f\n\r\t\v]+)( *)$");
-
-                    if (match.hasMatch()) // Для строки с данными соответсвующими колонкам
+                    if (myMatch.hasMatch()) // Для строки с данными соответствующими колонкам
                     {
                         QList<QString> dataFromString;
+                        int k=0; // Итератор для данных в строке
 
-                        // Отдельная обработка 9 таблицы, в которую криво занесли данные (как так можно?)
-                        if (table.tableNumber==9)
+                        if (onlySpaces.match(myMatch.captured(1)).hasMatch()) // Если на месте названия станции ничего нет
                         {
-                            dataFromString << varFor9Table;
+                            QString missingStationName="Название на предыдущей строке";
+                            if (!table.dividedData.isEmpty())
+                            {
+                                if (!table.dividedData.last().isEmpty())
+                                {
+                                    missingStationName=table.dividedData.last().first();
+                                }
+                            }
+                            dataFromString << missingStationName;
+                            k=1;
                         }
 
-                        int k=1; // Итератор для данных в строке
-                        while (k<match.lastCapturedIndex()+1)
+                        if (_spec->getTableData(table.tableName).isEmpty()) // Если таблица отсутсвует в спецификации
                         {
-                            if (onlySpaces.match(match.captured(k)).hasMatch())  // Если данных нет, записать _
-                            {
-                                dataFromString << "_";
-                            }
-                            else // Иначе записать данные без пробелов по бокам
-                            {
-                                dataFromString << withoutSpaces.match(match.captured(k)).captured(2);
-                            }
-                            k+=2;
+                            for(;k*2+1<myMatch.lastCapturedIndex()+1;k++)
+                                if (onlySpaces.match(myMatch.captured(k*2+1)).hasMatch()){  // Если данных нет, вернуть пустую строку
+                                    dataFromString << "";
+                                }
+                                else{ // Иначе записать данные без пробелов по бокам
+                                    dataFromString << withoutSpaces.match(myMatch.captured(k*2+1)).captured(2);
+                                }
+                            table.dividedData << dataFromString; // Запись данных из строки в структуру
                         }
-                        table.dividedData << dataFromString; // Запись данных из строки в структуру
+                        else
+                            table.dividedData+=MultipleStrings(dataFromString, myMatch, k, table.tableName);
                     }
                     else // Для строк, в которых "плохие" данные
                     {
-                        if (table.tableNumber==9)
-                        {
-                            //qDebug() << "" << text << endl;
-                            QRegularExpression stationName("[0-9]{1,3}.[ а-яА-Яa-zA-Z0-9" + minus + "]+");
-                            if (stationName.match(text).hasMatch())
-                            {
-                                varFor9Table=stationName.match(text).captured();
-                            }
-                            else table.wrongStrings << text;
-                        }
-                        else
-                            table.wrongStrings << text;
-                    }
-
+                        table.wrongStrings << text;
+                    }      
                 }
             }
         }
@@ -207,12 +93,12 @@ TableData TableReader::GetDataFromTable(TableData table)
     }
 }
 
-QList<QString> TableReader::GetTableNames()
+QStringList TableReader::GetTableNames()
 {
     QString text;
     QRegularExpressionMatch match;
-    QRegularExpression tableNameRead("Таблица[ 0-9.]+([0-9а-яА-Я " + minus + ",]+)");
-    QList<QString> names;
+    QRegularExpression tableNameRead("Таблица[ 0-9.]+([0-9а-яА-Я " + minus + "–,]+)");
+    QStringList names;
 
     while (index<datafile.length()){ // Запись названий таблиц в вектор
         text = datafile.at(index);
@@ -225,6 +111,271 @@ QList<QString> TableReader::GetTableNames()
         else break;
     }
     return names;
+}
+
+QList<QStringList> TableReader::MultipleStrings(QStringList dataFromString, QRegularExpressionMatch myMatch, int k, QString tableName)
+{
+    QList<QStringList> multipleDateStrings;
+    multipleDateStrings << dataFromString;
+
+    QRegularExpression onlySpaces("^ +$");
+    QRegularExpression withoutSpaces("^( *)(.*[^ \f\n\r\t\v]+)( *)$");
+
+    int specColumnIndex=k+3;
+
+    for (;k*2+1<myMatch.lastCapturedIndex()+1 && specColumnIndex<_spec->getTableData(tableName).columns.length();k++)
+    {
+        if (onlySpaces.match(myMatch.captured(k*2+1)).hasMatch())  // Если данных нет, вернуть пустую строку
+        {
+            for (int h=0;h<multipleDateStrings.length();h++){
+                multipleDateStrings[h] << "";
+            }
+        }
+        else // Иначе записать данные без пробелов по бокам
+        {
+            // Тут проверка на Дата
+            if (_spec->getTableData(tableName).columns.at(specColumnIndex).dataType == "DATE"){
+                QRegularExpression hackDate("([0-9]+)( |$)");
+                QRegularExpressionMatchIterator iterator=hackDate.globalMatch(myMatch.captured(k*2+1));
+                QList<QStringList> dataFromStringsBuffer;
+                QList<QStringList> resultStrings;
+                while (iterator.hasNext()){
+                    QRegularExpressionMatch dividedDate=iterator.next();
+                    dataFromStringsBuffer=multipleDateStrings;
+                    QList<QStringList>::iterator iDataBuffer;
+                    for(iDataBuffer = dataFromStringsBuffer.begin(); iDataBuffer != dataFromStringsBuffer.end() ; ++iDataBuffer){
+                        *iDataBuffer << withoutSpaces.match(dividedDate.captured(1)).captured(2);
+                    }
+                    resultStrings+= dataFromStringsBuffer;
+                }
+
+                multipleDateStrings=resultStrings;
+            }
+            else
+            // Тут проверка на время
+            if (_spec->getTableData(tableName).columns.at(specColumnIndex).dataType == "HOUR") // Проверка на тип данных "время"
+            {
+
+                QRegularExpression hackTime("([0-9]+) +([0-9]+)");
+                QRegularExpressionMatch timeMatch=hackTime.match(myMatch.captured(k*2+1));
+                QList<QStringList>::iterator multipleDateStringsIterator;
+                for(multipleDateStringsIterator = multipleDateStrings.begin(); multipleDateStringsIterator != multipleDateStrings.end() ; ++multipleDateStringsIterator){
+                    *multipleDateStringsIterator << withoutSpaces.match(timeMatch.captured(1)).captured(2) << withoutSpaces.match(timeMatch.captured(2)).captured(2);
+                }
+                specColumnIndex++;
+            }
+            else
+            {
+                QList<QStringList>::iterator multipleDateStringsIterator;
+                for(multipleDateStringsIterator = multipleDateStrings.begin(); multipleDateStringsIterator != multipleDateStrings.end() ; ++multipleDateStringsIterator){
+                    *multipleDateStringsIterator << withoutSpaces.match(myMatch.captured(k*2+1)).captured(2);
+                }
+            }
+        }
+        specColumnIndex++;
+    }
+
+//    if (!specColumnIndex<_spec->getTableData(tableName).columns.length())
+//        qDebug() << "Vot tut nakosyachil " << tableName;
+    return multipleDateStrings;
+}
+
+TableData TableReader::GetDataFrom9Table(TableData table, QRegularExpression regExpForTable)
+{
+    int i=0,j=0;
+    QString text,pattern;
+
+    while (j<table.headers)  // Работа поочередно с каждым набором данных в таблице
+    {
+        i=0;
+        QString varFor9Table;// Переменная, которая нужна для записи в 9 таблицу названия пункта
+        while (i<table.tableStrings.length())
+        {
+            if (table.headers==1)
+            {
+                text=table.tableStrings.at(i);
+            }
+            else
+            {
+                pattern=".{"+ QString::number(table.headerPosition.at(j)) +"}(.{" + QString::number(table.headerLength) +"})";
+                QRegularExpression oneTablePerString(pattern);
+                text=oneTablePerString.match(table.tableStrings.at(i)).captured(1); // Берем из строки только нужную таблицу
+            }
+
+            // Для начала убираем из строки слова про посторонние провода и переходы
+            text=CutProvod(text);
+            // Теперь убираем из строки номер станции
+            text=CutStationNumber(text);
+            // Извлечение данных из строки
+
+            // Тут добавляем пробелы, потому что иначе некоторые строки оказываются слишком короткими
+            QRegularExpressionMatch myMatch=regExpForTable.match(text+"                                                                                                                                                                 "); // ДА ЗДРАВСТВУЮТ КОСТЫЛИ!!!
+            QRegularExpression onlySpaces("^ +$");
+            QRegularExpression meaninglessString("^[ _-]*$");
+            QRegularExpression withoutSpaces("^( *)(.*[^ \f\n\r\t\v]+)( *)$");
+
+            if (!meaninglessString.match(text).hasMatch())
+            {
+                if (myMatch.hasMatch()) // Для строки с данными соответствующими колонкам
+                {
+                    QList<QString> dataFromString;
+
+                    // Отдельная обработка 9 таблицы, в которую криво занесли данные (как так можно?)
+                    dataFromString << varFor9Table;
+
+                    int k=0;
+                    if (_spec->getTableData(table.tableName).isEmpty()) // Если таблица отсутсвует в спецификации
+                    {
+                        while (k<myMatch.lastCapturedIndex()+1)
+                        {
+                            if (onlySpaces.match(myMatch.captured(k)).hasMatch()){  // Если данных нет, вернуть пустую строку
+                                dataFromString << "";
+                            }
+                            else{ // Иначе записать данные без пробелов по бокам
+                                dataFromString << withoutSpaces.match(myMatch.captured(k)).captured(2);
+                            }
+                            k+=2;
+                        }
+                        table.dividedData << dataFromString; // Запись данных из строки в структуру
+                    }
+                    else{
+                        QList<QStringList> multipleDateStrings;
+                        multipleDateStrings << dataFromString;
+
+                        QRegularExpression onlySpaces("^ +$");
+                        QRegularExpression withoutSpaces("^( *)(.*[^ \f\n\r\t\v]+)( *)$");
+
+                        int specColumnIndex=4;
+
+                        for (;k*2+1<myMatch.lastCapturedIndex()+1 && specColumnIndex<_spec->getTableData(table.tableName).columns.length();k++)
+                        {
+                            if (onlySpaces.match(myMatch.captured(k*2+1)).hasMatch())  // Если данных нет, вернуть пустую строку
+                            {
+                                for (int h=0;h<multipleDateStrings.length();h++){
+                                    multipleDateStrings[h] << "";
+                                }
+                            }
+                            else // Иначе записать данные без пробелов по бокам
+                            {
+                                // Тут проверка на Дата
+                                if (_spec->getTableData(table.tableName).columns.at(specColumnIndex).dataType == "DATE"){
+                                    QRegularExpression hackDate("([0-9]+)( |$)");
+                                    QRegularExpressionMatchIterator iterator=hackDate.globalMatch(myMatch.captured(k*2+1));
+                                    QList<QStringList> dataFromStringsBuffer;
+                                    QList<QStringList> resultStrings;
+                                    while (iterator.hasNext()){
+                                        QRegularExpressionMatch dividedDate=iterator.next();
+                                        dataFromStringsBuffer=multipleDateStrings;
+                                        QList<QStringList>::iterator iDataBuffer;
+                                        for(iDataBuffer = dataFromStringsBuffer.begin(); iDataBuffer != dataFromStringsBuffer.end() ; ++iDataBuffer){
+                                            *iDataBuffer << withoutSpaces.match(dividedDate.captured(1)).captured(2);
+                                        }
+                                        resultStrings+= dataFromStringsBuffer;
+                                    }
+
+                                    multipleDateStrings=resultStrings;
+                                }
+                                else
+                                // Тут проверка на время
+                                if (_spec->getTableData(table.tableName).columns.at(specColumnIndex).dataType == "HOUR") // Проверка на тип данных "время"
+                                {
+                                    QRegularExpression hackTime("([0-9]+) +([0-9]+)");
+                                    QRegularExpressionMatch timeMatch=hackTime.match(myMatch.captured(k*2+1));
+                                    QList<QStringList>::iterator multipleDateStringsIterator;
+                                    for(multipleDateStringsIterator = multipleDateStrings.begin(); multipleDateStringsIterator != multipleDateStrings.end() ; ++multipleDateStringsIterator){
+                                        *multipleDateStringsIterator  << timeMatch.captured(1) << timeMatch.captured(2);
+                                    }
+                                    specColumnIndex++;
+                                }
+                                else
+                                {
+                                    QList<QStringList>::iterator multipleDateStringsIterator;
+                                    for(multipleDateStringsIterator = multipleDateStrings.begin(); multipleDateStringsIterator != multipleDateStrings.end() ; ++multipleDateStringsIterator){
+                                        *multipleDateStringsIterator << withoutSpaces.match(myMatch.captured(k*2+1)).captured(2);
+                                    }
+                                }
+                            }
+                            specColumnIndex++;
+                        }
+                        table.dividedData+=multipleDateStrings; // Запись данных из строки в структуру
+                    }
+                }
+                else // Для строк, в которых "плохие" данные
+                {
+                    QRegularExpression stationName("[а-яА-Яa-zA-Z0-9" + minus + "–]+[ а-яА-Яa-zA-Z0-9" + minus + "–]*");
+                    if (stationName.match(text).hasMatch())
+                    {
+                        varFor9Table=stationName.match(text).captured();
+                    }
+                    else table.wrongStrings << text;
+                }
+            }
+            i++;
+        }
+        j++;
+    }
+    table.ranges << 0; // Да, я закинул мусор, но нам нужно чтобы длина этого списка соответствовала числу столбцов +1
+    return table;
+}
+
+QString TableReader::GetPatternForTable(QList<int> ranges)
+{
+    int i=0;
+
+    QString pattern="^";
+    while (i<ranges.length()-1) // -1 потому что в последней колонке бывает на символ меньше
+    {
+        pattern = pattern + "(.{" + QString::number((ranges.at(i++))-1) + "})( |$)";
+    }
+
+    pattern = pattern + "(.{" + QString::number((ranges.at(i++))-1) + "}.{0,2})( |$)";
+
+    return pattern;
+}
+
+QString TableReader::CutProvod(QString text)
+{
+    QRegularExpression postProvod("(.+)(Пост.провод)(.+)");
+    QRegularExpression perehod("(.+)(Переход.+месяца?)(.*)");
+    QRegularExpressionMatch postProvodMatch=postProvod.match(text);
+    QRegularExpressionMatch perehodMatch=perehod.match(text);
+    if (postProvodMatch.hasMatch())
+    {
+        text = postProvodMatch.captured(1);
+        for (int i=0;i<postProvodMatch.capturedLength(2);i++)
+        {
+            text+= " ";
+        }
+        text += postProvodMatch.captured(3);
+    }
+    if (perehodMatch.hasMatch())
+    {
+        text = perehodMatch.captured(1);
+        for (int i=0;i<perehodMatch.capturedLength(2);i++)
+        {
+            text+= " ";
+        }
+        text += perehodMatch.captured(3);
+    }
+
+    return text;
+}
+
+QString TableReader::CutStationNumber(QString text)
+{
+    QRegularExpression stationNumber("( *)([0-9]+[.])([а-яА-Яa-zA-Z ]+)(.*)");
+    QRegularExpressionMatch stationNumberMatch=stationNumber.match(text);
+    if (stationNumberMatch.hasMatch())
+    {
+        text=stationNumberMatch.captured(1);
+        for (int numOfNum = stationNumberMatch.captured(2).length();numOfNum>0;numOfNum--)
+        {
+            text+=" ";
+        }
+        text=text+stationNumberMatch.captured(3)+stationNumberMatch.captured(4);
+    }
+
+    return text;
 }
 
 int TableReader::ContentsSearch()
@@ -255,15 +406,15 @@ TableData TableReader::GetNextTable()
 
     QString text;
     QRegularExpressionMatch match;
-    QRegularExpression NOTAFUCKINGTABLE("Таблица *([0-9]+)a?. *([0-9а-яА-Я " + minus + ",.()]+)[.]{2,}"); // Как же я устал...
-    QRegularExpression tableSearch("Таблица *([0-9]+)a?. *([0-9а-яА-Я " + minus + ",.()]+)");
+    QRegularExpression notTable("Таблица *([0-9]+)a?. *([0-9а-яА-Я " + minus + ",.()–]+)[.…]{2,}"); // Как же я устал...
+    QRegularExpression tableSearch("Таблица *([0-9]+)a?. *([0-9а-яА-Я " + minus + ",.()–]+)");
     //    QRegularExpression dataString(" *[0-9]+[.] *[а-яА-Я ,.]+");
 
     while (index<datafile.length()){ // Поиск объявления таблицы
         text = datafile.at(index++);
         match = tableSearch.match(text);
 
-        if (match.hasMatch() && !NOTAFUCKINGTABLE.match(text).hasMatch()) // Если текущая строка оказалась объявлением таблицы записать её название и номер
+        if (match.hasMatch() && !notTable.match(text).hasMatch()) // Если текущая строка оказалась объявлением таблицы записать её название и номер
         {
             nextTable.tableNumber = (match.captured(1)).toInt();
             nextTable.tableName = match.captured(2);
@@ -297,7 +448,14 @@ TableData TableReader::GetNextTable()
         QRegularExpression notEmptyString("[^ ]");
         while (index<datafile.length()){ // Ищем начало заголовка (по сути, мы уже должны быть на нем, но мало ли...)
             text= datafile.at(index++);
-            pattern="^" +  QRegularExpression::escape(firstSymbol.match(text).captured(1)) + "* *$";
+            if (firstSymbol.match(text).hasMatch())
+            {
+                pattern="^" +  QRegularExpression::escape(firstSymbol.match(text).captured(1)) + "* *$";
+            }
+            else
+            {
+                pattern="^$";
+            }
             QRegularExpression oneSymbolString(pattern);
 
             if (!oneSymbolString.isValid())
@@ -348,7 +506,14 @@ TableData TableReader::GetNextTable()
 
         while (index<datafile.length()){ // Ищем конец заголовка и что-то делаем по пути (кажется)
             text= datafile.at(index++);
-            pattern="^" +  QRegularExpression::escape(firstSymbol.match(text).captured(1)) + "* *$";
+            if (firstSymbol.match(text).hasMatch())
+            {
+                pattern="^" +  QRegularExpression::escape(firstSymbol.match(text).captured(1)) + "* *$";
+            }
+            else
+            {
+                pattern="^$";
+            }
             QRegularExpression oneSymbolString(pattern);
             if (!oneSymbolString.isValid())
             {
@@ -469,10 +634,18 @@ QList<TableData> TableReader::GetAllTables()
 
     // Запись в файл всех "неправильных" строк для облегчения исправления ошибок
 
-    QFile wrongStringsOutput("Wrong strings.txt");
+    QFile wrongStringsOutput("Wrong_strings.txt");
     TableData table;
+    QFile::OpenMode openMode;
+    QFileInfo fileInfo(wrongStringsOutput.fileName());
+    if(!fileInfo.exists() || fileInfo.size() > 2097152){
+        openMode = QIODevice::WriteOnly | QIODevice::Text;
+    }
+    else{
+        openMode = QIODevice::Append | QIODevice::Text;
+    }
 
-    if(wrongStringsOutput.open( QIODevice::Append | QIODevice::Text)){
+    if(wrongStringsOutput.open(openMode)){
         QTextStream out(&wrongStringsOutput);
 
         int i=0;
@@ -493,12 +666,38 @@ QList<TableData> TableReader::GetAllTables()
     }
     else qDebug() << "Can't open file <Wrong strings.txt>" << endl;
 
+    // Дополнительная обработка 9 таблицы (ввод названий станций во все строки)
+    QString varForStationName;
+    for (int i=0, length=allTables.length(); i<length; i++)
+    {
+        if (allTables[i].tableNumber==9)
+        {
+            for (int j=0,lengthOfDvd=allTables[i].dividedData.length(); j<lengthOfDvd; j++)
+            {
+                QRegularExpression meaninglessString("^[ _-]*$");
+                QRegularExpressionMatch match=meaninglessString.match(allTables[i].dividedData.at(j).first());
+                if (!match.hasMatch())
+                {
+                    varForStationName=allTables[i].dividedData.at(j).first();
+                }
+                else
+                {
+                    if (!allTables[i].dividedData.at(j).isEmpty())
+                    {
+                        allTables[i].dividedData[j].pop_front(); // Удаляем мусор вместо названия станции
+                        allTables[i].dividedData[j].push_front(varForStationName); // Добавляем название станции
+                    }
+                }
+            }
+        }
+    }
+
     wrongStringsOutput.close();
     index=0;
     return allTables;
 }
 
-bool TableReader::ShowDividedTable(QList<QList<QString> > dividedData)
+bool TableReader::ShowDividedTable(QList<QStringList > dividedData)
 {
     QTextStream out(stdout);
     int i=0,j=0;
@@ -556,11 +755,11 @@ QList<int> TableReader::GetRanges(QString text)
 {
     QList<int> ranges;
 
-    QRegularExpression findRanges("(([ а-яА-Яa-zA-Z0-9.,/"+ QRegularExpression::escape("-") +"%]+[^ а-яА-Яa-zA-Z0-9.,/"+ QRegularExpression::escape("-") +"%])+)([ %а-яА-Яa-zA-Z0-9.,/"+ QRegularExpression::escape("-") +"]+)");
+    QRegularExpression findRanges("(([ а-яА-Яa-zA-Z0-9.,/<>"+ QRegularExpression::escape("-") +"%]+[^ а-яА-Яa-zA-Z0-9.,/<>"+ QRegularExpression::escape("-") +"%])+)([ %а-яА-Яa-zA-Z0-9.,/<>"+ QRegularExpression::escape("-") +"]+)");
 
     QRegularExpressionMatch match=findRanges.match(text);
 
-    QRegularExpression findSubRanges("[ а-яА-Яa-zA-Z0-9.,/"+ QRegularExpression::escape("-") +"%]+[^ а-яА-Яa-zA-Z0-9.,/"+ QRegularExpression::escape("-") +"%]");
+    QRegularExpression findSubRanges("[ а-яА-Яa-zA-Z0-9.,/<>"+ QRegularExpression::escape("-") +"%]+[^ а-яА-Яa-zA-Z0-9.,/<>"+ QRegularExpression::escape("-") +"%]");
     QRegularExpressionMatchIterator iterator=findSubRanges.globalMatch(match.captured(1));
 
 
@@ -573,7 +772,14 @@ QList<int> TableReader::GetRanges(QString text)
     return ranges;
 }
 
-TableReader::TableReader()
+TableReader::TableReader(QObject *parent) : QObject(parent)
 {
 
 }
+
+//<<-----------{
+void TableReader::setSpec(Specificator &spec)
+{
+    _spec = &spec;
+}
+//<<-----------}
